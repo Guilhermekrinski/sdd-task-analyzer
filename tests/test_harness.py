@@ -36,7 +36,7 @@ def test_total_de_tarefas() -> None:
 
 
 def test_tempo_medio_de_conclusao() -> None:
-    """Verifica o tempo médio de conclusão em horas."""
+    """Verifica o tempo médio geral e por prioridade."""
     tarefas = [
         {
             "id": 1,
@@ -61,6 +61,9 @@ def test_tempo_medio_de_conclusao() -> None:
     resultado = analyze_tasks(tarefas)
 
     assert resultado["tempo_medio_conclusao_horas"] == 3.0
+    assert resultado["tempo_medio_conclusao_horas_por_prioridade"] == {
+        "alta": 3.0
+    }
 
 
 def test_datas_inconsistentes_geram_excecao() -> None:
@@ -89,6 +92,7 @@ def test_lista_vazia() -> None:
     assert resultado["total_concluidas"] == 0
     assert resultado["total_pendentes"] == 0
     assert resultado["tempo_medio_conclusao_horas"] == 0.0
+    assert resultado["taxa_atraso_percentual"] == 0.0
 
 
 def test_apenas_tarefas_pendentes() -> None:
@@ -110,6 +114,8 @@ def test_apenas_tarefas_pendentes() -> None:
     assert resultado["total_concluidas"] == 0
     assert resultado["total_pendentes"] == 1
     assert resultado["tempo_medio_conclusao_horas"] == 0.0
+    assert resultado["taxa_atraso_percentual"] == 0.0
+
 
 def test_taxa_de_atraso_percentual() -> None:
     """Verifica a taxa de atraso quando metade das tarefas atrasa."""
@@ -164,6 +170,7 @@ def test_taxa_de_atraso_com_todas_no_prazo() -> None:
 
     assert resultado["taxa_atraso_percentual"] == 0.0
 
+
 def test_tarefa_sem_campo_obrigatorio() -> None:
     """Verifica o erro quando falta um campo obrigatório."""
     tarefas = [
@@ -174,7 +181,6 @@ def test_tarefa_sem_campo_obrigatorio() -> None:
             "data_criacao": "2026-01-01T09:00:00",
             "data_conclusao": "2026-01-01T11:00:00",
             "data_prazo": "2026-01-01T12:00:00",
-            # Campo status ausente
         },
     ]
 
@@ -242,5 +248,3 @@ def test_status_invalido() -> None:
 
     with pytest.raises(TaskValidationError):
         analyze_tasks(tarefas)
-
-
