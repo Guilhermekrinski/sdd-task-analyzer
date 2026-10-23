@@ -54,7 +54,7 @@ Os testes deverão contemplar cenários de sucesso e de erro.
 
 ## 7. Ponto que precisa ser esclarecido
 
-A taxa de atraso percentual está prevista entre as métricas, mas a estrutura de tarefa definida nesta especificação não apresenta um campo de prazo. Portanto, a regra para determinar quando uma tarefa está atrasada precisa ser esclarecida antes da implementação. Nenhum critério de atraso deverá ser presumido sem aprovação.
+A taxa de atraso percentual está prevista entre as métricas, mas a estrutura original da tarefa não apresenta um campo de prazo. Para viabilizar a implementação, foi definida uma regra proposta na seção seguinte, utilizando o campo adicional `data_prazo`. Essa decisão deverá ser validada com o professor, caso o enunciado original estabeleça critérios diferentes.
 
 ## 8. Regra adotada para a taxa de atraso
 
