@@ -22,6 +22,11 @@ def analyze_tasks(tarefas: list[dict[str, Any]]) -> dict[str, Any]:
     Raises:
         TaskValidationError: Se os dados de uma tarefa forem inválidos.
     """
+    if not isinstance(tarefas, list):
+        raise TaskValidationError(
+            "A entrada deve ser uma lista de tarefas."
+        )
+
     total_tarefas = len(tarefas)
     total_concluidas = 0
     total_pendentes = 0
@@ -40,16 +45,26 @@ def analyze_tasks(tarefas: list[dict[str, Any]]) -> dict[str, Any]:
 
     for tarefa in tarefas:
         if not isinstance(tarefa, dict):
-            raise TaskValidationError("Cada tarefa deve ser um dicionário.")
+            raise TaskValidationError(
+                "Cada tarefa deve ser um dicionário."
+            )
 
         campos_ausentes = campos_obrigatorios - tarefa.keys()
         if campos_ausentes:
             raise TaskValidationError(
-                f"Campos obrigatórios ausentes: {', '.join(sorted(campos_ausentes))}."
+                f"Campos obrigatórios ausentes: "
+                f"{', '.join(sorted(campos_ausentes))}."
+            )
+
+        if (
+            not isinstance(tarefa["titulo"], str)
+            or not tarefa["titulo"].strip()
+        ):
+            raise TaskValidationError(
+                "O título deve ser um texto não vazio."
             )
 
         status = tarefa["status"]
-
         if status not in {"concluida", "pendente"}:
             raise TaskValidationError(
                 "O status deve ser 'concluida' ou 'pendente'."
@@ -57,13 +72,25 @@ def analyze_tasks(tarefas: list[dict[str, Any]]) -> dict[str, Any]:
 
         prioridade = tarefa["prioridade"]
         if not isinstance(prioridade, str) or not prioridade.strip():
-            raise TaskValidationError("A prioridade deve ser um texto não vazio.")
+            raise TaskValidationError(
+                "A prioridade deve ser um texto não vazio."
+            )
+
+        try:
+            data_criacao = datetime.fromisoformat(
+                tarefa["data_criacao"]
+            )
+        except (TypeError, ValueError) as erro:
+            raise TaskValidationError(
+                "A data de criação deve estar no formato ISO 8601."
+            ) from erro
 
         if status == "pendente":
             if tarefa["data_conclusao"] is not None:
                 raise TaskValidationError(
                     "Tarefas pendentes devem ter data_conclusao igual a None."
                 )
+
             total_pendentes += 1
             continue
 
@@ -78,25 +105,29 @@ def analyze_tasks(tarefas: list[dict[str, Any]]) -> dict[str, Any]:
             )
 
         try:
-            data_criacao = datetime.fromisoformat(tarefa["data_criacao"])
-            data_conclusao = datetime.fromisoformat(tarefa["data_conclusao"])
-            data_prazo = datetime.fromisoformat(tarefa["data_prazo"])
+            data_conclusao = datetime.fromisoformat(
+                tarefa["data_conclusao"]
+            )
+            data_prazo = datetime.fromisoformat(
+                tarefa["data_prazo"]
+            )
         except (TypeError, ValueError) as erro:
             raise TaskValidationError(
                 "As datas devem estar no formato ISO 8601."
             ) from erro
 
-        if data_conclusao < data_criacao:
-            raise TaskValidationError(
-                "A data de conclusão não pode ser anterior à data de criação."
-            )
-
         if not (
-            data_criacao.tzinfo == data_conclusao.tzinfo
+            data_criacao.tzinfo
+            == data_conclusao.tzinfo
             == data_prazo.tzinfo
         ):
             raise TaskValidationError(
                 "As datas devem usar o mesmo padrão de fuso horário."
+            )
+
+        if data_conclusao < data_criacao:
+            raise TaskValidationError(
+                "A data de conclusão não pode ser anterior à data de criação."
             )
 
         if data_prazo < data_criacao:
@@ -109,7 +140,9 @@ def analyze_tasks(tarefas: list[dict[str, Any]]) -> dict[str, Any]:
         ).total_seconds() / 3600
 
         tempos_conclusao.append(duracao_horas)
-        tempos_por_prioridade.setdefault(prioridade, []).append(duracao_horas)
+        tempos_por_prioridade.setdefault(
+            prioridade, []
+        ).append(duracao_horas)
         total_concluidas += 1
 
         if data_conclusao > data_prazo:
@@ -137,6 +170,8 @@ def analyze_tasks(tarefas: list[dict[str, Any]]) -> dict[str, Any]:
         "total_concluidas": total_concluidas,
         "total_pendentes": total_pendentes,
         "tempo_medio_conclusao_horas": tempo_medio,
-        "tempo_medio_conclusao_horas_por_prioridade": tempo_medio_por_prioridade,
+        "tempo_medio_conclusao_horas_por_prioridade": (
+            tempo_medio_por_prioridade
+        ),
         "taxa_atraso_percentual": taxa_atraso_percentual,
     }

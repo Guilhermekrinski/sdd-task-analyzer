@@ -248,3 +248,124 @@ def test_status_invalido() -> None:
 
     with pytest.raises(TaskValidationError):
         analyze_tasks(tarefas)
+def test_entrada_que_nao_e_lista():
+    from src.task_analyzer import TaskValidationError, analyze_tasks
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks(None)
+
+
+def test_titulo_vazio():
+    from src.task_analyzer import TaskValidationError, analyze_tasks
+
+    tarefa = {
+        "id": 1,
+        "titulo": " ",
+        "prioridade": "alta",
+        "data_criacao": "2026-01-01T10:00:00",
+        "data_conclusao": "2026-01-01T11:00:00",
+        "data_prazo": "2026-01-01T12:00:00",
+        "status": "concluida",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
+def test_prioridade_vazia():
+    tarefa = {
+        "id": 1,
+        "titulo": "Estudar Python",
+        "prioridade": " ",
+        "data_criacao": "2026-01-01T10:00:00",
+        "data_conclusao": "2026-01-01T11:00:00",
+        "data_prazo": "2026-01-01T12:00:00",
+        "status": "concluida",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
+
+
+def test_tarefa_pendente_com_data_conclusao():
+    tarefa = {
+        "id": 1,
+        "titulo": "Estudar Python",
+        "prioridade": "alta",
+        "data_criacao": "2026-01-01T10:00:00",
+        "data_conclusao": "2026-01-01T11:00:00",
+        "status": "pendente",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
+
+
+def test_tarefa_concluida_sem_data_conclusao():
+    tarefa = {
+        "id": 1,
+        "titulo": "Estudar Python",
+        "prioridade": "alta",
+        "data_criacao": "2026-01-01T10:00:00",
+        "data_conclusao": None,
+        "data_prazo": "2026-01-01T12:00:00",
+        "status": "concluida",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
+
+
+def test_tarefa_concluida_sem_prazo():
+    tarefa = {
+        "id": 1,
+        "titulo": "Estudar Python",
+        "prioridade": "alta",
+        "data_criacao": "2026-01-01T10:00:00",
+        "data_conclusao": "2026-01-01T11:00:00",
+        "status": "concluida",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
+
+
+def test_datas_com_fusos_horarios_diferentes():
+    tarefa = {
+        "id": 1,
+        "titulo": "Estudar Python",
+        "prioridade": "alta",
+        "data_criacao": "2026-01-01T10:00:00",
+        "data_conclusao": "2026-01-01T11:00:00+00:00",
+        "data_prazo": "2026-01-01T12:00:00",
+        "status": "concluida",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
+def test_prazo_anterior_a_criacao_gera_excecao() -> None:
+    """Verifica que o prazo não pode anteceder a criação."""
+    tarefa = {
+        "id": 1,
+        "titulo": "Tarefa com prazo inválido",
+        "prioridade": "alta",
+        "data_criacao": "2026-01-02T12:00:00",
+        "data_conclusao": "2026-01-02T13:00:00",
+        "data_prazo": "2026-01-02T11:00:00",
+        "status": "concluida",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
+def test_data_de_conclusao_em_formato_invalido() -> None:
+    """Verifica a validação do formato da data de conclusão."""
+    tarefa = {
+        "id": 1,
+        "titulo": "Tarefa com data inválida",
+        "prioridade": "alta",
+        "data_criacao": "2026-01-02T10:00:00",
+        "data_conclusao": "data-invalida",
+        "data_prazo": "2026-01-02T12:00:00",
+        "status": "concluida",
+    }
+
+    with pytest.raises(TaskValidationError):
+        analyze_tasks([tarefa])
