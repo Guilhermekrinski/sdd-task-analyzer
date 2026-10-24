@@ -1,0 +1,7 @@
+services:
+  task-analyzer-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-analyzer-tests
+    command: python -m pytest -v
