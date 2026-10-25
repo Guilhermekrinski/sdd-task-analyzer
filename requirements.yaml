@@ -1,0 +1,26 @@
+project:
+  name: TaskAnalyzer
+  language: Python
+  python_version: "3.11"
+
+dependencies:
+  runtime: []
+  development:
+    - pytest>=8.0
+
+testing:
+  framework: pytest
+  test_directory: tests/
+  command: python -m pytest -v
+
+quality:
+  type_hints: required
+  style: PEP 8
+  docstrings: Google
+  coverage_target: 100%
+
+constraints:
+  persistence: false
+  database: false
+  external_api: false
+  business_rules_must_be_approved: true
